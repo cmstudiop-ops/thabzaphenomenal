@@ -10,6 +10,23 @@
 
 The website is hosted as static files through GitHub Pages when publishing is enabled. In GitHub **Settings → Pages**, deploy branch `main` from `/(root)`. Do not move the .co.za domain until the new site has been fully tested.
 
+## Customer accounts and shopping cart
+
+- `auth.html`: responsive customer sign in, account creation, email confirmation flow, password reset.
+- `account.html`: user initials, profile editor, submitted orders and order statuses, security.
+- `cart.html`: persistent database cart, quantities, specifications, totals/quotation requirement and checkout submission.
+- `store.js` + `customer.css`: account nav, responsive mobile account icon, initials avatar, cart count, sign-in gate and add-to-cart service.
+- `tp_customers`: customers' first/last name and contact information, isolated by Supabase RLS.
+- `tp_cart_items`: each user's saved cart, visible to the authorised administrator under **Active customer carts**.
+- `tp_customer_orders` and `tp_customer_order_items`: submitted customer order requests, separate from unsubmitted carts.
+- `public.tp_submit_cart` RPC: atomic server-side checkout that reads the actual product catalogue and tier prices, copies line items, and clears the cart when successfully submitted. No online payment or confirmed sale occurs during checkout.
+
+Public navigation no longer contains the Admin link. Customers see separate **Sign in** and **Sign up** actions on desktop; on mobile an account SVG menu opens both choices. Signed-in users see initials based on the first and last names, e.g. Jonathan Ntando Fakude → JF (first name Jonathan, surname Fakude).
+
+**Authentication configuration required:** In the Photography Supabase project, check Authentication → URL Configuration and allow the published account redirect `https://YOUR-PUBLISHED-DOMAIN/account.html` for email confirmation and password reset. Also ensure email/password sign-up is enabled and a working email sender is configured. Never disable account ownership RLS.
+
+The admin dashboard refreshes Active Carts and Submitted Orders while it is open. WhatsApp-only enquiries remain separate and do not automatically create order records. Product values are indicative until reviewed by the business; quote-only items cannot be treated as paid transactions.
+
 ## Database
 Uses the existing Photography Supabase project `tjlanldknskbahzxwecw`, with all Thabza data held in tables beginning with `tp_`. Portfolio, categories, products, bulk pricing, order records, administrator roles and public website settings are stored separately from Photography tables. All exposed Thabza tables use RLS and restricted SQL grants.
 
