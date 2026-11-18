@@ -5,7 +5,7 @@ const publicKey='sb_publishable_4kTdJhBYRsTwIu3UWGDhDw_BXmVrsXw';
 try{
  const res=await fetch(project+'/rest/v1/tp_settings?select=key,value',{headers:{apikey:publicKey,Accept:'application/json'}});
  if(!res.ok)throw new Error('Settings unavailable: '+res.status);
- const rows=await res.json();const s=Object.fromEntries(rows.map(r=>[r.key,r.value||'']));
+ const rows=await res.json();const s=Object.fromEntries(rows.map(r=>[r.key,r.value||'']));window.TP_PUBLIC_SETTINGS=s;
  const pick=(sel)=>document.querySelector(sel);
  const text=(sel,value)=>{if(value){const el=pick(sel);if(el)el.textContent=value}};
  const address=s.address||'',phone=s.phone||'',email=s.email||'',wa=(s.whatsapp||'').replace(/\D/g,'');
