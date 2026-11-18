@@ -36,7 +36,11 @@ try{
   const social=document.createElement('div');social.className='footer-social';social.style.cssText='display:flex;gap:12px;flex-wrap:wrap;margin-top:12px';
   ['facebook','instagram','tiktok','linkedin'].forEach(key=>{const url=s[key];if(url&&/^https:\/\//i.test(url)){const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=key[0].toUpperCase()+key.slice(1);a.style.cssText='font-size:11px;text-decoration:underline;text-underline-offset:3px';social.append(a)}});foot.append(social);
  }
- if(s.website_notice&&document.body&&!document.getElementById('websiteNotice')){
+ const visible=(key,selector)=>{if(s[key]==='false'){document.querySelectorAll(selector).forEach(el=>el.style.setProperty('display','none','important'))}};
+ visible('show_services','#services');visible('show_printing','.print-band');visible('show_catalogue','#shop');visible('show_contact_cta','#contact');
+ visible('show_whatsapp','.whatsapp-float,.whatsapp');
+ visible('show_back_to_top','.back-to-top,.up');
+if(s.website_notice&&document.body&&!document.getElementById('websiteNotice')){
   const n=document.createElement('div');n.id='websiteNotice';n.textContent=s.website_notice;n.setAttribute('role','status');n.style.cssText='background:#e8c46f;color:#252018;text-align:center;font-size:11px;font-weight:800;padding:8px 15px';
   const header=pick('header');if(header)header.insertAdjacentElement('beforebegin',n)
  }
