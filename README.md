@@ -1,34 +1,44 @@
-# Thabza Phenomenal — Website 2026
-A premium mobile-friendly service catalogue and content management dashboard.
+# Thabza Phenomenal — Website and Admin Control Centre
 
-## Live repository
-https://github.com/cmstudiop-ops/thabzaphenomenal
+## Project links
+- GitHub repository: https://github.com/cmstudiop-ops/thabzaphenomenal
+- Storefront: `index.html`
+- Company page: `about.html`
+- Portfolio: `portfolio.html`
+- Administrator portal: **`admin.html`**
+- Public site settings handler: `site-settings.js`
 
-## Hosting
-This is a static GitHub Pages site. In repository **Settings → Pages**, select **Deploy from a branch**, branch **main**, folder **/(root)**. Publish first on the temporary github.io address. Do not point the existing domain at the new site until it is tested.
+The website is hosted as static files through GitHub Pages when publishing is enabled. In GitHub **Settings → Pages**, deploy branch `main` from `/(root)`. Do not move the .co.za domain until the new site has been fully tested.
 
-## Supabase
-Uses the existing Photography project (project ref: tjlanldknskbahzxwecw), but all new Thabza tables have the `tp_` prefix. The initial migration created categories, products, tier prices, portfolio, admin roles and an image storage bucket. No Photography data was edited.
+## Database
+Uses the existing Photography Supabase project `tjlanldknskbahzxwecw`, with all Thabza data held in tables beginning with `tp_`. Portfolio, categories, products, bulk pricing, order records, administrator roles and public website settings are stored separately from Photography tables. All exposed Thabza tables use RLS and restricted SQL grants.
 
-## First admin account
-1. In the **Photography** Supabase dashboard, go to **Authentication → Users**. Create/invite the intended Thabza administrator or use an existing authorized account.
-2. Copy their **User UID** (not their email).
-3. In **SQL Editor**, run:
-```sql
-insert into public.tp_admins(user_id) values ('PASTE-USER-UUID-HERE')
-on conflict (user_id) do nothing;
-```
-4. Visit the website `#admin` and sign in using that account.
-Only an owner-authorized account should be added.
+## Administrator account
+The **verified** Supabase Auth user `admin@thabzaphenomenal.co.za` has been assigned a Thabza administrator role in `tp_admins`. No password was created, disclosed or changed through the website build.
 
-## Content management
-Admins can add/edit/delete categories, products, bulk quantity tiers and portfolio images. Photos can be uploaded to the dedicated `tp-public` bucket. Customer enquiries open WhatsApp with prefilled details; this is *not* payment checkout.
+Open `admin.html` on the published site and sign in using that account's existing password. If the password is unknown, use the **Forgot password** flow; Supabase Auth URL configuration must permit the deployed `admin.html` redirect. Ensure email/password authentication is enabled in the Supabase Authentication provider settings. Never store passwords or API secrets in this repository.
 
-## Before launch
-- Upload the exact official company logo as `logo.png` and update the header's brand markup.
-- Enter real verified product prices and add photos to the admin portal.
-- Add actual social links and verify all public business details.
-- Test mobile / desktop, accessibility and security.
-- Configure a verified South African payment provider and server-verified pricing before enabling online checkout.
-- Configure DNS for thabzaphenomenal.co.za and permanent redirects from thabzaphenomenal.site only after the new site is ready.
-- Review Supabase project's existing security advisories (some relate to older, unrelated applications).
+## Admin functions
+- Overview: genuine counts for the Thabza database (no invented analytics)
+- Orders: view and manually update recorded order status and notes
+- Products: create, edit, hide, sort and upload product photos
+- Categories: create, edit, sort, hide and upload category images
+- Bulk pricing: set per-product quantity tiers and validate overlapping ranges
+- Portfolio: upload images, set category and order, publish or unpublish
+- Website settings: company details, contact info, WhatsApp number, hero content, public artwork, accent colour, SEO, social links, portfolio headline and section visibility
+- Security: account details, password change, sign out
+
+### Notes about live operations
+Website settings are **public display data only**. Never paste payment credentials, passwords or private API keys into settings fields. Logo/hero changes uploaded from admin are served from the `tp-public` Supabase Storage bucket and override GitHub defaults. Category images and product images are independently uploadable.
+
+The current customer enquiry process opens WhatsApp; these conversations **do not become order records automatically**. Likewise, there is no verified online payment checkout yet. To accept paid online orders later, implement server-side price calculation, secure payment gateway webhooks and transaction verification before enabling checkout.
+
+## Ready for launch checklist
+1. Open and check `admin.html` with the authorised email/password.
+2. Verify each tab can save and that public site changes appear after refresh.
+3. Upload authentic product, category and portfolio photos, and confirm published content.
+4. Verify telephone, WhatsApp, email, address, website notices and company details.
+5. Confirm Pages publishing and password-reset redirect allowlist in Supabase Auth.
+6. Test responsive desktop/mobile display and avoid publishing unverified pricing.
+7. Configure the .co.za domain and redirects only after approval.
+8. Review Supabase security advisors on the shared Photography project; some findings predate this website.
