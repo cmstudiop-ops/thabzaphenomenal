@@ -15,7 +15,13 @@ try{
  if(s.logo_url&&/^https:\/\//i.test(s.logo_url))document.querySelectorAll('.brand-logo,.logo').forEach(img=>img.src=s.logo_url);
  const hero=pick('.hero-premium');if(hero&&s.hero_image_url&&/^https:\/\//i.test(s.hero_image_url))hero.style.backgroundImage='linear-gradient(90deg,#181818 0%,#191919dd 32%,#15151533 72%),url("'+s.hero_image_url.replaceAll('"','%22')+'")';
  const aboutHero=pick('.about-visual');if(aboutHero&&s.hero_image_url&&/^https:\/\//i.test(s.hero_image_url))aboutHero.style.backgroundImage='linear-gradient(150deg,#111b18aa,#181b1688),url("'+s.hero_image_url.replaceAll('"','%22')+'")';
- text('.hero-premium h1',s.hero_title);text('.hero-premium .hero-text>p',s.hero_subtitle);text('#shop .section-head h2',s.home_catalogue_heading);
+ const heroHeadline=pick('.hero-premium h1');
+ if(heroHeadline&&s.hero_title){
+  const raw=s.hero_title.trim();let lines=raw.includes('|')?raw.split('|').map(x=>x.trim()).filter(Boolean):[];
+  if(!lines.length&&raw.includes(',')){const at=raw.lastIndexOf(',');const start=raw.slice(0,at+1).trim(),end=raw.slice(at+1).trim();const words=start.split(/\s+/);const mid=Math.ceil(words.length/2);lines=[words.slice(0,mid).join(' '),words.slice(mid).join(' '),end].filter(Boolean)}
+  if(lines.length>1){heroHeadline.replaceChildren();lines.forEach((line,i)=>{if(i)heroHeadline.append(document.createElement('br'));if(i===lines.length-1){const em=document.createElement('em');em.textContent=line;heroHeadline.append(em)}else heroHeadline.append(document.createTextNode(line))})}else heroHeadline.textContent=raw
+ }
+ text('.hero-premium .hero-text>p',s.hero_subtitle);text('#shop .section-head h2',s.home_catalogue_heading);
  text('.final-premium h2',s.contact_heading);text('.page-hero h1',document.title.includes('Portfolio')?s.portfolio_heading:null);
  text('.about-grid .intro',s.company_about);
  const cta=pick('.hero-premium .hero-buttons .btn-gold');
