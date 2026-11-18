@@ -73,7 +73,10 @@ if(type==='categories'){head='<th>Category</th><th>Slug</th><th>Visibility</th><
 if(type==='products'){head='<th>Product</th><th>Category</th><th>Pricing</th><th>Visibility</th><th>Actions</th>';rows=items.map(x=>'<tr><td><div style="display:flex;align-items:center;gap:10px">'+imgCell(x.image_url)+'<div><div class="tdtitle">'+esc(x.name)+'</div><div class="tdsubtitle">'+esc(x.unit||'item')+'</div></div></div></td><td>'+esc(categoryName(x.category_id))+'</td><td>'+esc(x.price_type==='quote'?'Quote required':x.price_type==='tiered'?'Bulk tiers':fmt(x.base_price))+'</td><td>'+statusBadge(x.active)+'</td><td>'+act(x)+'</td></tr>').join('')}
 if(type==='tiers'){head='<th>Product</th><th>Quantity</th><th>Price per unit</th><th>Actions</th>';rows=items.map(x=>'<tr><td class="tdtitle">'+esc(productName(x.product_id))+'</td><td>'+esc(x.min_qty)+' – '+esc(x.max_qty??'Unlimited')+'</td><td>'+fmt(x.unit_price)+'</td><td>'+act(x)+'</td></tr>').join('')}
 if(type==='portfolio'){head='<th>Project</th><th>Category</th><th>Visibility</th><th>Order</th><th>Actions</th>';rows=items.map(x=>'<tr><td><div style="display:flex;gap:10px;align-items:center">'+imgCell(x.image_url)+'<strong>'+esc(x.title)+'</strong></div></td><td>'+esc(categoryName(x.category_id))+'</td><td>'+statusBadge(x.active)+'</td><td>'+esc(x.sort_order)+'</td><td>'+act(x)+'</td></tr>').join('')}
-if(type==='orders'){head='<th>Order</th><th>Customer</th><th>Product</th><th>Qty</th><th>Status</th><th>Received</th><th>Actions</th>';rows=items.map(x=>'<tr><td><strong>'+esc(x.id.slice(0,8).toUpperCase())+'</strong></td><td><div class="tdtitle">'+esc(x.customer_name)+'</div><div class="tdsubtitle">'+esc(x.phone)+'</div></td><td>'+esc(x.product_name)+'</td><td>'+esc(x.quantity)+'</td><td>'+statusBadge(x.status)+'</td><td>'+esc(date(x.created_at))+'</td><td>'+act(x)+'</td></tr>').join('')}
+if(type==='orders'){
+ head='<th>Order</th><th>Customer</th><th>Products</th><th>Qty</th><th>Status</th><th>Submitted</th><th>Actions</th>';
+ rows=items.map(x=>'<tr><td><strong>'+esc(x.id.slice(0,8).toUpperCase())+'</strong><div class="tdsubtitle">'+(x.total==null?'Quote pending':fmt(x.total))+'</div></td><td><div class="tdtitle">'+esc(x.customer_name)+'</div><div class="tdsubtitle">'+esc(x.customer_email)+' · '+esc(x.customer_phone)+'</div></td><td>'+esc(orderSummary(x.id))+'</td><td>'+esc(orderQuantity(x.id))+'</td><td>'+statusBadge(x.status)+'</td><td>'+esc(date(x.created_at))+'</td><td>'+act(x)+'</td></tr>').join('')
+}
 return '<div class="table-scroll"><table class="datatable"><thead><tr>'+head+'</tr></thead><tbody>'+rows+'</tbody></table></div>'}
 function categoryName(id){return collections.categories.find(c=>c.id===id)?.name||'Uncategorised'}
 function orderSummary(id){return collections.orderItems.filter(x=>x.order_id===id).map(x=>x.product_name).join(', ')||'Order items'}
@@ -98,7 +101,7 @@ tiers:[['product_id','Product','product',true],['min_qty','Minimum order quantit
 portfolio:[['title','Project title','text',true],['category_id','Service category','category'],['description','Project details','textarea'],['sort_order','Display order','number'],['featured','Featured project','checkbox'],['active','Published in portfolio','checkbox'],['image_url','Image address (optional)','text'],['_image','Upload project photograph','file']],
 orders:[['status','Order stage','status'],['notes','Internal notes','textarea'],['total','Agreed order total (R)','money']]
 };
-const statuses=['submitted','reviewing','new','quoted','awaiting_payment','paid','in_production','ready','complete','cancelled'];
+const statuses=['submitted','reviewing','quoted','awaiting_payment','paid','in_production','ready','complete','cancelled'];
 function renderField(key,label,kind,req,value){const v=value??'',id='f_'+key;if(kind==='checkbox')return '<div class="field checkfield"><input type="checkbox" id="'+id+'" name="'+key+'" '+(v===true?'checked':'')+'><label for="'+id+'">'+esc(label)+'</label></div>';
 let widget='';
 if(kind==='textarea')widget='<textarea name="'+key+'" id="'+id+'">'+esc(v)+'</textarea>';
@@ -145,3 +148,4 @@ function accountPage(){return heading('Security & account','Your administrator i
 async function changePassword(e){e.preventDefault();const p=$('newPw').value,c=$('confirmPw').value;if(p!==c)return notify('Passwords do not match',true);const r=await db.auth.updateUser({password:p});if(r.error)return notify(r.error.message,true);e.target.reset();notify('Password updated')}
 db.auth.onAuthStateChange((evt,s)=>{if(evt==='SIGNED_OUT')showLogin()});
 boot();
+setInterval(async()=>{if(!user||document.visibilityState!=='visible'||!['overview','orders','carts'].includes(tab)||$('modalBg').classList.contains('open'))return;try{await loadAll();render()}catch(e){console.warn('Automatic admin refresh failed:',e.message)}},20000);
