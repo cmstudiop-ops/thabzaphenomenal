@@ -7,13 +7,13 @@ const rawNext=params.get('next')||'account.html';
 const next=/^(index\.html(?:#[\w-]+)?|cart\.html|account\.html)$/.test(rawNext)?rawNext:'account.html';
 let mode=params.get('mode')==='signup'?'signup':'signin';
 function message(text,error=false){$('authMessage').innerHTML='<div class="'+(error?'auth-error':'auth-success')+'">'+store.escape(text)+'</div>'}
-function setMode(value){mode=value;const up=mode==='signup';$('registerFields').hidden=!up;$('signupHint').hidden=!up;$('firstName').required=up;$('lastName').required=up;$('forgotPassword').hidden=up;$('authTitle').textContent=up?'Create your account.':'Welcome back.';$('authSubtitle').textContent=up?'A personal account for your saved cart, orders and profile.':'Sign in to continue shopping and see your orders.';$('authSubmit').textContent=up?'Create my account':'Sign in';$('password').setAttribute('autocomplete',up?'new-password':'current-password');$('signInTab').classList.toggle('active',!up);$('signUpTab').classList.toggle('active',up);$('signInTab').setAttribute('aria-selected',String(!up));$('signUpTab').setAttribute('aria-selected',String(up));$('authMessage').replaceChildren();history.replaceState(null,'','?mode='+mode+(rawNext!=='account.html'?'&next='+encodeURIComponent(next):''))}
+function setMode(value){mode=value;const up=mode==='signup';$('registerFields').hidden=!up;$('signupHint').hidden=!up;$('firstName').required=up;$('lastName').required=up;$('forgotPassword').hidden=up;$('authTitle').textContent=up?'Create your account.':'Welcome back.';$('authSubtitle').textContent=up?'A personal account for your saved cart, orders and profile.':'Sign in to continue shopping and see your orders.';$('authSubmit').textContent=up?'Create my account':'Sign in';$('password').setAttribute('autocomplete',up?'new-password':'current-password');$('password').minLength=up?12:1;$('signInTab').classList.toggle('active',!up);$('signUpTab').classList.toggle('active',up);$('signInTab').setAttribute('aria-selected',String(!up));$('signUpTab').setAttribute('aria-selected',String(up));$('authMessage').replaceChildren();history.replaceState(null,'','?mode='+mode+(rawNext!=='account.html'?'&next='+encodeURIComponent(next):''))}
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 $('authForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('authSubmit');btn.disabled=true;const email=$('email').value.trim(),password=$('password').value;try{
  if(mode==='signup'){
  const first=$('firstName').value.trim(),last=$('lastName').value.trim(),phone=$('phone').value.trim();
  if(!first||!last)throw Error('Please provide your first and last names.');
- if(password.length<8)throw Error('Use a password with at least 8 characters.');
+ if(password.length<12)throw Error('Use a password with at least 12 characters.');
  const redirect=location.origin+location.pathname.replace(/auth\.html$/,'account.html');
  const r=await db.auth.signUp({email,password,options:{emailRedirectTo:redirect,data:{first_name:first,last_name:last,phone}}});
  if(r.error)throw r.error;
