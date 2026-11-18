@@ -15,7 +15,7 @@ async function updateQuantity(id,delta){if(loading)return;const x=items.find(x=>
 async function remove(id){const r=await db.from('tp_cart_items').delete().eq('id',id).eq('user_id',store.getUser().id);if(r.error)return store.notice(r.error.message,true);await store.refreshCart();await load()}
 async function saveNotes(input){const r=await db.from('tp_cart_items').update({notes:input.value,updated_at:new Date().toISOString()}).eq('id',input.dataset.notes).eq('user_id',store.getUser().id);if(r.error)store.notice(r.error.message,true)}
 async function checkout(e){e.preventDefault();const button=e.target.querySelector('[type=submit]');button.disabled=true;button.textContent='Submitting your request...';try{const noteFields=[...document.querySelectorAll('[data-notes]')];for(const input of noteFields){const previous=items.find(x=>x.id===input.dataset.notes)?.notes||'';if(input.value!==previous){const save=await db.from('tp_cart_items').update({notes:input.value,updated_at:new Date().toISOString()}).eq('id',input.dataset.notes).eq('user_id',store.getUser().id);if(save.error)throw save.error}}
- const r=await db.rpc('tp_submit_cart',{p_phone:e.target.phone.value.trim(),p_notes:e.target.notes.value.trim()});
+ const fields=new FormData(e.target);const r=await db.rpc('tp_submit_cart',{p_phone:String(fields.get('phone')||'').trim(),p_notes:String(fields.get('notes')||'').trim()});
  if(r.error)throw r.error;
  await store.refreshCart();location.href='account.html?order='+encodeURIComponent(r.data);
 }catch(err){store.notice(err.message||'Unable to submit order',true);button.disabled=false;button.textContent='Submit order request'}}
